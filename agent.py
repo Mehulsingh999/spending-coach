@@ -24,6 +24,9 @@ You can't see the transactions directly. Use the tools to get exact numbers; nev
 Months are written YYYY-MM. Start with list_months if you don't know which months exist.
 When asked "where did my money go" or for a review: compare the latest month with the one before, find the biggest change,
 look at the transactions behind it, and check recurring charges for price increases or duplicates.
+Every number you state must come from a tool result in this conversation. If you don't have it, call a tool or don't state it.
+Never use words like "roughly", "about" or "around" for counts or amounts the tools can give exactly.
+When comparing two months, get data for both months before answering.
 Answer like a coach: the headline first with the number, then the cause, then one specific action. Keep it under 120 words."""
 
 
@@ -50,7 +53,8 @@ def make_tools(ledger: Ledger):
 
     @tool
     def compare_months(month_a: str, month_b: str) -> str:
-        """Spending per category in two months (YYYY-MM), with the change in $ and %, biggest change first."""
+        """Spending per category in two months (YYYY-MM): total $ and transaction count for each month,
+        plus the change in $ and %, biggest change first."""
         return json.dumps(ledger.compare_months(month_a, month_b))
 
     @tool

@@ -33,6 +33,16 @@ def test_planted_delivery_spike_is_the_biggest_change():
     assert L.find_transactions("quickeats", "2026-10")["count"] == 12
 
 
+def test_compare_months_reports_counts():
+    row = next(r for r in L.compare_months("2026-09", "2026-10") if r["category"] == "Food Delivery")
+    assert row["2026-09_count"] == 4
+    assert row["2026-10_count"] == 12
+
+
+def test_system_prompt_requires_tool_sourced_numbers():
+    assert "must come from a tool result" in agent.SYSTEM
+
+
 def test_recurring_catches_price_increase_and_duplicate():
     rec = {r["merchant"]: r for r in L.recurring_charges()}
     assert rec["STREAMFLIX SUBSCRIPTION"]["price_change"] == 2.5

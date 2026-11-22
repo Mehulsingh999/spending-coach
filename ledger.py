@@ -67,13 +67,25 @@ class Ledger:
                 totals[t.category] += t.spend
         return {k: round(v, 2) for k, v in sorted(totals.items(), key=lambda kv: -kv[1])}
 
+    def _spend_and_count_by_category(self, month: str) -> dict[str, tuple[float, int]]:
+        totals: dict[str, float] = defaultdict(float)
+        counts: dict[str, int] = defaultdict(int)
+        for t in self.txns:
+            if t.month == month and t.amount < 0:
+                totals[t.category] += t.spend
+                counts[t.category] += 1
+        return {k: (round(totals[k], 2), counts[k]) for k in totals}
+
     def compare_months(self, month_a: str, month_b: str) -> list[dict]:
-        a, b = self.spend_by_category(month_a), self.spend_by_category(month_b)
+        a, b = self._spend_and_count_by_category(month_a), self._spend_and_count_by_category(month_b)
         rows = []
         for cat in sorted(set(a) | set(b)):
-            va, vb = a.get(cat, 0.0), b.get(cat, 0.0)
+            va, ca = a.get(cat, (0.0, 0))
+            vb, cb = b.get(cat, (0.0, 0))
             pct = None if va == 0 else round((vb - va) / va * 100, 1)
-            rows.append({"category": cat, month_a: va, month_b: vb, "change": round(vb - va, 2), "change_pct": pct})
+            rows.append({"category": cat, month_a: va, f"{month_a}_count": ca,
+                         month_b: vb, f"{month_b}_count": cb,
+                         "change": round(vb - va, 2), "change_pct": pct})
         return sorted(rows, key=lambda r: -abs(r["change"]))
 
     def find_transactions(self, text: str = "", month: str | None = None, category: str | None = None) -> dict:
